@@ -6,11 +6,10 @@ const initialColor = {
   code: { hex: "" }
 };
 
-const ColorList = ({ colors, updateColors }) => {
+const ColorList = ({ colors, makeRefresh }) => {
   console.log(colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
-  const [theColors, setTheColors] = useState([])
   const [errors, setErrors] = useState({
     color: '',
     code: {
@@ -26,7 +25,6 @@ const ColorList = ({ colors, updateColors }) => {
     },
     id: ''
   })
-  console.log(theColors)
 
   const editColor = color => {
     setEditing(true);
@@ -35,7 +33,8 @@ const ColorList = ({ colors, updateColors }) => {
 
   const saveEdit = e => {
     e.preventDefault()
-		axios().put(`/api/colors/${colorToEdit.id}`, colorToEdit)
+    axios().put(`/api/colors/${colorToEdit.id}`, colorToEdit)
+      .then(makeRefresh())
 			.then(result => {
         setEditing(false)
         console.log('Color was edited!')
@@ -45,18 +44,16 @@ const ColorList = ({ colors, updateColors }) => {
 			})
 	}
 
-  const deleteColor = id => {
-    const color = colors.find(color => color.id === id)
+  const deleteColor = color => {
     if (window.confirm('Are you sure you want to delete color?'))
-    setTheColors(theColors.filter(color => color.id !== id))
-    axios().delete(`/api/colors/${id}`)
+    axios().delete(`/api/colors/${color.id}`)
+      .then(makeRefresh())
       .then(res => {
         console.log('Color was deleted!')
 
       })
       .catch(err => {
         console.log(err, err.response)
-        setTheColors([ ...theColors, color ])
       })
   };
 
@@ -71,6 +68,7 @@ const ColorList = ({ colors, updateColors }) => {
     })}
     axios()
       .post('/api/colors/', newColor)
+      .then(makeRefresh())
       .then(res => {
         console.log(res.data)
       })
