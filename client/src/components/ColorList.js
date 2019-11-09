@@ -11,6 +11,21 @@ const ColorList = ({ colors, updateColors }) => {
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
   const [theColors, setTheColors] = useState([])
+  const [errors, setErrors] = useState({
+    color: '',
+    code: {
+      hex: ''
+    },
+    id: ''
+  })
+  
+  const [newColor, setNewColor] = useState({
+    color: '',
+    code: {
+      hex: ''
+    },
+    id: ''
+  })
   console.log(theColors)
 
   const editColor = color => {
@@ -44,6 +59,41 @@ const ColorList = ({ colors, updateColors }) => {
         setTheColors([ ...theColors, color ])
       })
   };
+
+  const addColor = e => {
+    e.preventDefault();
+    if (!newColor.color) {
+      return setErrors({ ...errors, 
+        name: 'Color cannot be blank!',
+        code: {
+          hex: 'Hex cannot be empty.',
+        },
+    })}
+    axios()
+      .post('/api/colors/', newColor)
+      .then(res => {
+        console.log(res.data)
+      })
+      .catch(err => {
+        return err.response
+      })
+    resetForm();
+  }
+
+  const resetForm = () => {
+    setNewColor({
+      name: '',
+      code: {
+        hex: '',
+      },
+    })
+    setErrors({
+      name: '',
+      code: {
+        hex: '',
+      },
+    })
+  }
 
   return (
     <div className="colors-wrap">
@@ -99,7 +149,31 @@ const ColorList = ({ colors, updateColors }) => {
         </form>
       )}
       <div className="spacer" />
-      {/* stretch - build another form here to add a color */}
+      <form onSubmit={addColor}>
+        <h1>New Color</h1>
+        <hr />
+        <input
+          type="text"
+          name="color"
+          placeholder="Color"
+          value={newColor.color}
+          onChange={(e) => setNewColor({ ...newColor, color: e.target.value })}
+          required
+        />
+        
+        <input
+          type="text"
+          name="hex"
+          placeholder="Hex"
+          value={newColor.code.hex}
+          onChange={(e) => setNewColor({ ...newColor, code: { hex: e.target.value }})}
+          required
+        />
+  
+        <button className="addBtn" type="submit">
+          Add
+        </button>
+      </form>
     </div>
   );
 };
